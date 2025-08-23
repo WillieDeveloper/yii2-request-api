@@ -4,6 +4,7 @@ namespace app\models;
 
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "requests".
@@ -17,14 +18,15 @@ use yii\db\ActiveRecord;
  * @property string $created_at
  * @property string $updated_at
  */
-class Requests extends ActiveRecord
+class Request extends ActiveRecord
 {
     public function behaviors()
     {
         return [
-            [
+            'timestamp' => [
                 'class' => TimestampBehavior::class,
-            ],
+                'value' => new Expression('NOW()'),
+            ]
         ];
     }
 
@@ -34,29 +36,6 @@ class Requests extends ActiveRecord
     public static function tableName()
     {
         return '{{%requests}}';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['username', 'email', 'message'], 'required'],
-            ['comment', 'required', 'when' => function ($model) {
-                return $model->status === 'Resolved';
-            }],
-            [['username', 'email'], 'string', 'max' => 255],
-            [['username', 'email'], 'unique', 'targetAttribute' => ['username', 'email']],
-            [['status'], 'string', 'max' => 20],
-            ['status', 'in', 'range' => [
-                'Active',
-                'Resolved',
-            ]],
-            ['status', 'default', 'value' => 'Active'],
-            [['message', 'comment'], 'string'],
-            ['comment', 'default', 'value' => null],
-        ];
     }
 
     /**
@@ -75,5 +54,4 @@ class Requests extends ActiveRecord
             'updated_at' => 'Время ответа на заявку ',
         ];
     }
-
 }
