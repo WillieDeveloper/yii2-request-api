@@ -1,5 +1,8 @@
 <?php
 
+use app\components\JwtValidationData;
+use sizeg\jwt\Jwt;
+use yii\filters\Cors;
 use yii\symfonymailer\Mailer;
 
 $params = require __DIR__ . '/params.php';
@@ -28,9 +31,16 @@ $config = [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
+        'jwt' => [
+            'class' => Jwt::class,
+            'key' => 'asjhdujwhi12o2i3jonkfhjnfi2j3ij2ink3cef',
+            'jwtValidationData' => JwtValidationData::class,
+        ],
         'user' => [
             'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
+            'enableAutoLogin' => false,
+            'enableSession' => false,
+            'loginUrl' => null,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -58,6 +68,19 @@ $config = [
             'rules' => [
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'request'],
             ],
+        ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
+    ],
+    'as cors' => [
+        'class' => Cors::class,
+        'cors' => [
+            'Origin' => ['http://localhost', 'http://localhost:3000', 'http://127.0.0.1', 'http://127.0.0.1:3000'],
+            'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+            'Access-Control-Request-Headers' => ['Authorization', 'Content-Type'],
+            'Access-Control-Allow-Credentials' => true,
+            'Access-Control-Max-Age' => 3600,
         ],
     ],
     'params' => $params,

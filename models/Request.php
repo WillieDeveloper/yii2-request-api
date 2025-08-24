@@ -2,9 +2,8 @@
 
 namespace app\models;
 
-use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\db\Expression;
 
 /**
  * This is the model class for table "requests".
@@ -20,20 +19,12 @@ use yii\db\Expression;
  */
 class Request extends ActiveRecord
 {
-    public function behaviors()
-    {
-        return [
-            'timestamp' => [
-                'class' => TimestampBehavior::class,
-                'value' => new Expression('NOW()'),
-            ]
-        ];
-    }
+
 
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%requests}}';
     }
@@ -41,7 +32,7 @@ class Request extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -53,5 +44,10 @@ class Request extends ActiveRecord
             'created_at' => 'Время создания заявки',
             'updated_at' => 'Время ответа на заявку ',
         ];
+    }
+
+    public function getUser(): ActiveQuery
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 }

@@ -2,31 +2,23 @@
 
 namespace app\controllers;
 
+use app\filters\RequestFieldsFilter;
 use yii\filters\AccessControl;
-use yii\filters\Cors;
 use yii\rest\ActiveController;
 
 class RequestController extends ActiveController
 {
     public $modelClass = 'app\models\logical\Request';
 
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
-            'corsFilter' => [
-                'class' => Cors::class,
-            ],
             'access' => [
                 'class' => AccessControl::class,
                 'rules' => [
                     [
                         'allow' => true,
                         'actions' => ['index', 'view', 'options'],
-                        'roles' => ['?', '@'],
-                    ],
-                    [
-                        'allow' => false,
-                        'actions' => ['create', 'update', 'delete'],
                         'roles' => ['?'],
                     ],
                     [
@@ -37,5 +29,14 @@ class RequestController extends ActiveController
                 ],
             ],
         ];
+    }
+
+    public function actions(): array
+    {
+        $actions = parent::actions();
+        $actions['index']['prepareSearchQuery'] = function ($query, $requestParams) {
+            return RequestFieldsFilter::filter($query, $requestParams, $this->modelClass);
+        };
+        return $actions;
     }
 }

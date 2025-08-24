@@ -3,9 +3,22 @@
 namespace app\models\logical;
 
 use app\models\Request as BaseRequest;
+use app\models\User;
+use yii\behaviors\TimestampBehavior;
+use yii\db\Expression;
+
 class Request extends BaseRequest
 {
-    public function rules()
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'value' => new Expression('NOW()'),
+            ]
+        ];
+    }
+    public function rules(): array
     {
         return [
             [['username', 'email', 'message'], 'required'],
@@ -23,15 +36,17 @@ class Request extends BaseRequest
             ['status', 'default', 'value' => 'Active'],
             [['message', 'comment'], 'string'],
             ['comment', 'default', 'value' => null],
+            ['user_id', 'integer'],
+            ['user_id', 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
-    public function fields()
+    public function fields(): array
     {
         return ['id', 'username', 'email', 'status', 'message', 'comment'];
     }
 
-    public function extraFields()
+    public function extraFields(): array
     {
         return ['created_at', 'updated_at'];
     }

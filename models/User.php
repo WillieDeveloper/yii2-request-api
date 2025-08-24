@@ -2,103 +2,104 @@
 
 namespace app\models;
 
-class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
+use Yii;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
+
+class User extends ActiveRecord implements IdentityInterface
 {
-    public $id;
-    public $username;
-    public $password;
-    public $authKey;
-    public $accessToken;
+    const ROLE_USER = 'user';
+    const ROLE_ADMIN = 'admin';
 
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
+    public static function tableName(): string
+    {
+        return '{{%users}}';
+    }
 
+    public function rules(): array
+    {
+        return [
+            [['username', 'password_hash', 'role'], 'required'],
+            ['username', 'string', 'max' => 50],
+            ['role', 'string', 'max' => 20],
+            ['username', 'unique'],
+        ];
+    }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return static::findOne($id);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
+        try {
+            $jwt = Yii::$app->jwt;
+            $token = $jwt->getParser()->parse((string) $token);
+            $data = $jwt->getValidationData();
+            $data->setCurrentTime(time());
+
+            if ($token->validate($data) && $token->verify($jwt->getSigner(), $jwt->getKey())) {
+                return static::findOne($token->getClaim('uid'));
             }
+        } catch (\Exception $e) {
+            return null;
         }
 
         return null;
     }
 
-    /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
-     */
-    public static function findByUsername($username)
-    {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getId()
     {
         return $this->id;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getAuthKey()
     {
-        return $this->authKey;
+        return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function validateAuthKey($authKey)
+    public function validateAuthKey($authKey): bool
     {
-        return $this->authKey === $authKey;
+        return false;
     }
 
-    /**
-     * Validates password
-     *
-     * @param string $password password to validate
-     * @return bool if password provided is valid for current user
-     */
-    public function validatePassword($password)
+    public function validatePassword($password): bool
     {
-        return $this->password === $password;
+        return Yii::$app->security->validatePassword($password, $this->password_hash);
+    }
+
+    public function generateJwt()
+    {
+        $jwt = Yii::$app->jwt;
+        $signer = $jwt->getSigner('HS256');
+        $key = $jwt->getKey();
+        $time = time();
+
+        return $jwt->getBuilder()
+            ->issuedBy('http://localhost') // Локальный хост
+            ->permittedFor('http://localhost') // Локальный хост
+            ->identifiedBy('yii2-request-api-local', true) // Уникальный ID для локального проекта
+            ->issuedAt($time)
+            ->expiresAt($time + 86400) // 24 часа для удобства тестирования
+            ->withClaim('uid', $this->id)
+            ->withClaim('role', $this->role)
+            ->getToken($signer, $key);
+    }
+
+    public function getRole()
+    {
+        return $this->role;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function getRequests(): ActiveQuery
+    {
+        return $this->hasMany(Request::class, ['user_id' => 'id']);
     }
 }
