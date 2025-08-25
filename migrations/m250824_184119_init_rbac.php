@@ -55,22 +55,5 @@ class m250824_184119_init_rbac extends Migration
     public function safeDown()
     {
         echo "m250824_184119_init_rbac cannot be reverted.\n";
-
-        return false;
     }
-
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m250824_184119_init_rbac cannot be reverted.\n";
-
-        return false;
-    }
-    */
 }

@@ -19,8 +19,6 @@ use yii\db\ActiveRecord;
  */
 class Request extends ActiveRecord
 {
-
-
     /**
      * {@inheritdoc}
      */

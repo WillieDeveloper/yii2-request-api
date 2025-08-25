@@ -12,7 +12,7 @@ class m250824_182727_add_user_id_column_to_requests_table extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('{{%requests}}', 'user_id', $this->integer()->notNull());
+        $this->addColumn('{{%requests}}', 'user_id', $this->integer()->notNull()->defaultValue(1));
         $this->addForeignKey(
             'fk-requests-user_id',
             '{{%requests}}',

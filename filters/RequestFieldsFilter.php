@@ -2,8 +2,6 @@
 
 namespace app\filters;
 
-use Yii;
-
 class RequestFieldsFilter
 {
     public static function filter($query, $requestParams, $modelClass)

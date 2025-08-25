@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\JwtToken;
 use app\models\User;
 use Yii;
 use yii\rest\Controller;
@@ -29,7 +30,7 @@ class AuthController extends Controller
         }
 
         return [
-            'token' => $user->generateJwt(),
+            'token' => JwtToken::generate($user),
             'role' => $user->role,
         ];
     }
@@ -45,7 +46,7 @@ class AuthController extends Controller
 
         if ($user->save()) {
             return [
-                'token' => $user->generateJwt(),
+                'token' => JwtToken::generate($user),
                 'role' => $user->role,
             ];
         }

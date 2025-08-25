@@ -70,24 +70,6 @@ class User extends ActiveRecord implements IdentityInterface
         return Yii::$app->security->validatePassword($password, $this->password_hash);
     }
 
-    public function generateJwt()
-    {
-        $jwt = Yii::$app->jwt;
-        $signer = $jwt->getSigner('HS256');
-        $key = $jwt->getKey();
-        $time = time();
-
-        return $jwt->getBuilder()
-            ->issuedBy('http://localhost') // Локальный хост
-            ->permittedFor('http://localhost') // Локальный хост
-            ->identifiedBy('yii2-request-api-local', true) // Уникальный ID для локального проекта
-            ->issuedAt($time)
-            ->expiresAt($time + 86400) // 24 часа для удобства тестирования
-            ->withClaim('uid', $this->id)
-            ->withClaim('role', $this->role)
-            ->getToken($signer, $key);
-    }
-
     public function getRole()
     {
         return $this->role;

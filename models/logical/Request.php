@@ -4,18 +4,27 @@ namespace app\models\logical;
 
 use app\models\Request as BaseRequest;
 use app\models\User;
+use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\db\Expression;
+use yii\db\BaseActiveRecord;
 
 class Request extends BaseRequest
 {
+    public const STATUS_ACTIVE = 'Active';
+    public const STATUS_RESOLVED = 'Resolved';
     public function behaviors(): array
     {
         return [
-            'timestamp' => [
+            [
                 'class' => TimestampBehavior::class,
-                'value' => new Expression('NOW()'),
-            ]
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+                'value' => function() {
+                    return date('Y-m-d H:i:s');
+                },
+            ],
         ];
     }
     public function rules(): array
@@ -37,6 +46,7 @@ class Request extends BaseRequest
             [['message', 'comment'], 'string'],
             ['comment', 'default', 'value' => null],
             ['user_id', 'integer'],
+            ['user_id', 'default', 'value' => 1],
             ['user_id', 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
