@@ -50,13 +50,15 @@ $config = [
             'viewPath' => '@app/mail',
             // send all mails to a file by default.
             'useFileTransport' => true,
+            'fileTransportPath' => '@runtime/mail',
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
+                    'levels' => ['error', 'warning', 'info'],
+                    'logFile' => '@runtime/logs/app.log',
                 ],
             ],
         ],
@@ -66,21 +68,13 @@ $config = [
             'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
+                'auth/login' => 'auth/login',
+                'auth/register' => 'auth/register',
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'request'],
             ],
         ],
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
-        ],
-    ],
-    'as cors' => [
-        'class' => Cors::class,
-        'cors' => [
-            'Origin' => ['http://localhost', 'http://localhost:3000', 'http://127.0.0.1', 'http://127.0.0.1:3000'],
-            'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
-            'Access-Control-Request-Headers' => ['Authorization', 'Content-Type'],
-            'Access-Control-Allow-Credentials' => true,
-            'Access-Control-Max-Age' => 3600,
         ],
     ],
     'params' => $params,
