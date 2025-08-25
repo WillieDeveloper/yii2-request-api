@@ -3,7 +3,6 @@
         <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
     </a>
     <h1 align="center">Yii 2 Basic Project Template</h1>
-    <br>
 </p>
 
 Yii 2 Basic Project Template based, Yii2 Request API
@@ -27,11 +26,15 @@ Composer
 git clone git@github.com:WillieDeveloper/yii2-request-api.git
 ~~~
 Выполните установку зависимостей:
-`composer install`
+~~~
+composer install
+~~~
 
 Выполните накатку миграций:
-`php yii migrate --migrationPath=@yii/rbac/migrations`
-`php yii migrate`
+~~~
+php yii migrate --migrationPath=@yii/rbac/migrations
+php yii migrate
+~~~
 
 
 Доступные методы REST API
